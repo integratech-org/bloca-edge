@@ -1,0 +1,21 @@
+[project]
+name = "bloca-edge"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "aiomqtt>=2.5.1",
+  "aiosqlite>=0.22.1",
+  "httpx>=0.28.1",
+  "pydantic>=2.14.2",
+  "pydantic-settings>=2.16.2",
+  "websockets>=17.4",
+]
+
+[dependency-groups]
+dev = ["pre-commit>=4.7.0", "ruff>=0.17.3"]
+
+[build-system]
+requires = ["uv_build>=0.12.8,<0.13"]
+build-backend = "uv_build"
