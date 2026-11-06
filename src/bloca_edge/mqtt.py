@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections.abc import Awaitable, Callable
 
 import aiomqtt
 
@@ -11,10 +12,13 @@ TOPIC_STATUS = "bloca/status"
 TOPIC_TELEMETRY = "bloca/telemetry"
 TOPIC_CMD = "bloca/cmd"
 
+Handler = Callable[[bytes], Awaitable[None]]
+
 
 class MQTTClient:
-    def __init__(self, settings: Settings) -> None:
+    def __init__(self, settings: Settings, handlers: dict[str, Handler]) -> None:
         self._settings = settings
+        self._handlers = handlers
 
     async def run(self) -> None:
         s = self._settings
@@ -32,10 +36,19 @@ class MQTTClient:
                 ) as client:
                     logger.info("MQTT connected to %s:%d", s.mqtt_host, s.mqtt_port)
 
-                    await client.subscribe(TOPIC_TELEMETRY, qos=1)
+                    for topic in self._handlers:
+                        await client.subscribe(topic, qos=1)
 
                     async for message in client.messages:
-                        print(message.payload)
+                        handler = self._handlers.get(str(message.topic))
+                        if handler is None:
+                            continue
+                        try:
+                            await handler(bytes(message.payload))
+                        except Exception:
+                            logger.exception(
+                                "Error handling message on topic %s", message.topic
+                            )
 
             except aiomqtt.MqttError as exc:
                 logger.warning("MQTT connection lost: %s. Retrying in 5s", exc)
