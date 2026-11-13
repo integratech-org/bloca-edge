@@ -10,6 +10,7 @@ class Settings(BaseSettings):
         env_ignore_empty=True,
     )
 
+    cloud_ws_url: str
     device_token: str
 
     mqtt_host: str = "localhost"
