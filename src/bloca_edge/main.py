@@ -13,7 +13,7 @@ async def main() -> None:
         level=logging.INFO,
     )
     settings = get_settings()
-    logger.info("Starting bloca-edge (device_id=%s)", settings.device_id)
+    logger.info("Starting bloca-edge")
 
     mqtt = MQTTClient(
         settings=settings,

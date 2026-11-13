@@ -10,7 +10,7 @@ class Settings(BaseSettings):
         env_ignore_empty=True,
     )
 
-    device_id: str
+    device_token: str
 
     mqtt_host: str = "localhost"
     mqtt_port: int = 1883
