@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from functools import partial
 
 from bloca_edge.config import get_settings
 from bloca_edge.handlers import handle_status, handle_telemetry
@@ -17,19 +18,23 @@ async def main() -> None:
 
     logger.info("bloca-edge server starting")
 
-    mqtt = MQTTClient(
-        settings=settings,
-        handlers={TOPIC_STATUS: handle_status, TOPIC_TELEMETRY: handle_telemetry},
-    )
-
     ws = WSClient(
         settings=settings,
     )
 
+    mqtt = MQTTClient(
+        settings=settings,
+        handlers={
+            TOPIC_STATUS: handle_status,
+            TOPIC_TELEMETRY: partial(handle_telemetry, ws),
+        },
+    )
+
     try:
         async with asyncio.TaskGroup() as tg:
-            tg.create_task(mqtt.run())
             tg.create_task(ws.run())
+            tg.create_task(mqtt.run())
+
     finally:
         logger.info("bloca-edge server stopped")
 
